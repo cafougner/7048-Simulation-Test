@@ -2,8 +2,8 @@ package frc.robot.commands;
 
 import static edu.wpi.first.units.Units.*;
 
-import static frc.robot.RobotConstants.*;
-import static frc.robot.subsystems.drivetrain.DrivetrainConstants.*;
+import static frc.robot.subsystems.drivetrain.DrivetrainConfiguration.kMaxLinearSpeed;
+import static frc.robot.subsystems.drivetrain.DrivetrainConfiguration.kMaxAngularSpeed;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;

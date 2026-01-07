@@ -3,9 +3,10 @@ package frc.robot.subsystems.drivetrain.swervemodule.io;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
-import static frc.robot.subsystems.drivetrain.DrivetrainConstants.kAzimuthMotorConfiguration;
-import static frc.robot.subsystems.drivetrain.DrivetrainConstants.kDriveMotorConfiguration;
-import static frc.robot.subsystems.drivetrain.DrivetrainConstants.kDriveMotorToWheelFactor;
+import static frc.robot.RobotConstants.Drivetrain.*;
+import static frc.robot.subsystems.drivetrain.DrivetrainConfiguration.kAzimuthMotorConfiguration;
+import static frc.robot.subsystems.drivetrain.DrivetrainConfiguration.kDriveMotorConfiguration;
+import static frc.robot.subsystems.drivetrain.DrivetrainConfiguration.kDriveMotorToWheelFactor;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusCode;

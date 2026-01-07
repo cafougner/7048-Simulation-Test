@@ -1,7 +1,7 @@
 package frc.robot.subsystems.drivetrain.swervemodule;
 
 import static edu.wpi.first.units.Units.*;
-import static frc.robot.subsystems.drivetrain.DrivetrainConstants.kDriveMotorToWheelFactor;
+import static frc.robot.subsystems.drivetrain.DrivetrainConfiguration.kDriveMotorToWheelFactor;
 
 import org.littletonrobotics.junction.Logger;
 

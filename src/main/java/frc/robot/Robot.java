@@ -37,7 +37,7 @@ public class Robot extends LoggedRobot {
             default -> "Unknown.";
         });
 
-        switch (RobotConstants.ROBOT_BEHAVIOR) {
+        switch (RobotConstants.BEHAVIOR) {
             case REAL -> {
                 Logger.addDataReceiver(new NT4Publisher());
                 Logger.addDataReceiver(new WPILOGWriter());
@@ -75,7 +75,7 @@ public class Robot extends LoggedRobot {
         m_autonomousCommand = m_robotContainer.getAutonomousCommand();
         if (m_autonomousCommand != null) m_autonomousCommand.schedule();
 
-        if (RobotConstants.ROBOT_BEHAVIOR == RobotBehavior.SIMULATION) {
+        if (RobotConstants.BEHAVIOR == RobotBehavior.SIMULATION) {
             SimulatedArena.getInstance().resetFieldForAuto();
         }
     }

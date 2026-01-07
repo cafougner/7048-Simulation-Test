@@ -16,11 +16,11 @@ import edu.wpi.first.wpilibj.Timer;
 
 import frc.robot.utils.FieldUtils;
 
-public class VisionIOBase implements VisionIO {
+public class VisionIOReal implements VisionIO {
     protected final PhotonCamera m_camera;
     protected final PhotonPoseEstimator m_poseEstimator;
 
-    public VisionIOBase(String cameraName, Transform3d cameraTransform) {
+    public VisionIOReal(String cameraName, Transform3d cameraTransform) {
         m_camera = new PhotonCamera(cameraName);
         
         m_poseEstimator = new PhotonPoseEstimator(

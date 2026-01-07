@@ -1,6 +1,6 @@
 package frc.robot.subsystems.drivetrain;
 
-import static frc.robot.subsystems.drivetrain.DrivetrainConstants.*;
+import static frc.robot.subsystems.drivetrain.DrivetrainConfiguration.*;
 
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
@@ -12,6 +12,9 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
 import frc.robot.Robot;
@@ -26,10 +29,10 @@ public final class DrivetrainSubsystem implements Subsystem {
     private final SwerveDrivePoseEstimator m_poseEstimator;
 
     private final SwerveDriveKinematics m_kinematics = new SwerveDriveKinematics(
-        kFLSwerveModuleConfiguration.moduleTranslation(),
-        kFRSwerveModuleConfiguration.moduleTranslation(),
-        kBLSwerveModuleConfiguration.moduleTranslation(),
-        kBRSwerveModuleConfiguration.moduleTranslation()
+        kModuleConfigurations[0].moduleTranslation(),
+        kModuleConfigurations[1].moduleTranslation(),
+        kModuleConfigurations[2].moduleTranslation(),
+        kModuleConfigurations[3].moduleTranslation()
     );
 
     private final SwerveDriveSimulation m_simulation;
@@ -95,11 +98,28 @@ public final class DrivetrainSubsystem implements Subsystem {
 
         chassisSpeeds = ChassisSpeeds.discretize(chassisSpeeds, Robot.defaultPeriodSecs);
         SwerveModuleState[] desiredStates = m_kinematics.toSwerveModuleStates(chassisSpeeds);
-        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, kMaxAttainableLinearSpeed);
+        SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, 4.0);
+        Logger.recordOutput("DrivetrainSubsystem/DesiredStates", desiredStates);
 
         for (int i = 0; i < m_swerveModules.length; i++) {
             m_swerveModules[i].setDesiredState(desiredStates[i]);
         }
+    }
+
+    public final void setSwerveModulesWheelVelocity(LinearVelocity velocity) {
+        for (var swerveModule : m_swerveModules) swerveModule.setWheelVelocity(velocity);
+    }
+
+    public final void setSwerveModulesWheelAzimuth(Angle azimuth) {
+        for (var swerveModule : m_swerveModules) swerveModule.setWheelAzimuth(azimuth);
+    }
+
+    public final void setSwerveModulesDriveMotorVoltage(Voltage voltage) {
+        for (var swerveModule : m_swerveModules) swerveModule.setDriveMotorVoltage(voltage);
+    }
+
+    public final void setSwerveModulesAzimuthMotorVoltage(Voltage voltage) {
+        for (var swerveModule : m_swerveModules) swerveModule.setAzimuthMotorVoltage(voltage);
     }
 
     public final SwerveModule[] getSwerveModules() {
