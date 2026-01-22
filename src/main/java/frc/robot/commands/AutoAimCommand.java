@@ -77,8 +77,8 @@ public final class AutoAimCommand extends Command {
         );
 
         // leading
-        var projVelocity = 2.0;
-        double timeToLead = Math.min(hubRelative.getNorm() / projVelocity, 0.75);
+        var projVelocity = 8.0;
+        double timeToLead = Math.min(hubRelative.getNorm() / projVelocity * 5.0, 1.5);
         var leadVector = hubRelative.minus(robotVelocity.times(timeToLead));
         double angleError = leadVector.getAngle().minus(robotPose.getRotation()).getRadians();
         //angleError = Math.atan2(Math.sin(angleError), Math.cos(angleError)); // Limit to [-pi, pi]
