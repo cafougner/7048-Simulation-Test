@@ -145,10 +145,11 @@ public final class RobotContainer {
             }
 
             // Use projected velocity instead of just speedTemp.vxMetersPerSecond
-            var shooterAngle = ShooterUtils.getLaunchAngle(
-                Meters.of(hubDistance),
-                MetersPerSecond.of(8.0 + robotVelAlongHub)
-            );
+            var shooterAngle = ShooterUtils.getLaunchAngles(
+                MetersPerSecond.of(8.0),
+            Meters.of(hubDistance),
+            Meters.of(1.8288 -  0.762)
+            ).getSecond();
 
             SimulatedArena.getInstance().addGamePieceProjectile(new RebuiltFuelOnFly(
                 m_drivetrain.getSimulationPose().getTranslation(),
@@ -159,7 +160,7 @@ public final class RobotContainer {
                 MetersPerSecond.of(8.0),
                 shooterAngle
             ));
-        }), new WaitCommand(0.15)));
+        }), new WaitCommand(0.2)));
     }
 
     private final void configureAutoChooser() {

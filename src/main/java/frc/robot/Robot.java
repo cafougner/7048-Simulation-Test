@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
+
 import org.ironmaple.simulation.SimulatedArena;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -19,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 
 import frc.robot.RobotConstants.RobotBehavior;
 import frc.robot.utils.RobotVisualizer;
+import frc.robot.utils.ShooterUtils;
 
 public final class Robot extends LoggedRobot {
     private final RobotContainer m_robotContainer;
@@ -54,6 +58,11 @@ public final class Robot extends LoggedRobot {
 
         DriverStation.silenceJoystickConnectionWarning(!DriverStation.isFMSAttached());
         SmartDashboard.putData("CommandScheduler", CommandScheduler.getInstance());
+        System.out.println(ShooterUtils.getLaunchAngles(
+            MetersPerSecond.of(14.9),
+            Meters.of(2.3),
+            Meters.of(1.8288 -  0.762)
+        ));
 
         m_robotContainer = new RobotContainer();
     }
