@@ -6,7 +6,6 @@ import static frc.robot.subsystems.drivetrain.DrivetrainConfiguration.kMaxLinear
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.ProfiledPIDController;
-import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
@@ -16,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 
 import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
 import frc.robot.utils.FieldUtils;
+import frc.robot.utils.ShooterUtils;
 
 public final class AutoAimCommand extends Command {
     private final CommandXboxController m_controller;
@@ -65,8 +65,37 @@ public final class AutoAimCommand extends Command {
             leftY = leftY / leftMagnitude * scaledLeftMagnitude;
         }
 
-        Pose2d robotPose = m_drivetrain.getEstimatedPose();
-        Translation2d hubRelativeTranslation = FieldUtils.getAllianceHub().minus(robotPose.getTranslation());
+        var hubPose = FieldUtils.getAllianceHub();
+        var robotPose = m_drivetrain.getEstimatedPose();
+        var hubRelative = hubPose.minus(robotPose.getTranslation());
+        var speedsTemp = m_drivetrain.getChassisSpeeds();
+        speedsTemp = ChassisSpeeds.fromRobotRelativeSpeeds(speedsTemp, hubRelative.getAngle());
+        Translation2d robotVelocity = new Translation2d(
+            speedsTemp.vxMetersPerSecond,
+            speedsTemp.vyMetersPerSecond
+        );
+
+        double leadTime = hubRelative.getNorm() / (12.0 * Math.cos(
+            ShooterUtils.getLaunchAngles(
+                MetersPerSecond.of(12.0),
+                Meters.of(hubRelative.getNorm()),
+                Meters.of(1.8288 - 0.0762)
+            ).getSecond().in(Radians)
+        ));
+
+        Translation2d leadVector = hubRelative.minus(robotVelocity.times(leadTime));
+
+        for (int i = 0; i < 25; i++) {
+            double newLeadTime = leadVector.getNorm() / (12.0 * Math.cos(
+                ShooterUtils.getLaunchAngles(
+                    MetersPerSecond.of(12.0),
+                    Meters.of(leadVector.getNorm()),
+                    Meters.of(1.8288 - 0.0762)
+                ).getSecond().in(Radians)
+            ));
+
+            leadVector = hubRelative.minus(robotVelocity.times(newLeadTime));
+        }
 
         // In the WPILib coordinate system, +X is forward and +Y is left (relative to
         // the blue driver station), so the controller X and Y are flipped and inverted.
@@ -75,7 +104,7 @@ public final class AutoAimCommand extends Command {
         m_desiredSpeeds.vyMetersPerSecond = -leftX * kMaxLinearSpeed.in(MetersPerSecond);
         m_desiredSpeeds.omegaRadiansPerSecond = m_omegaController.calculate(
             robotPose.getRotation().getRadians(),
-            hubRelativeTranslation.getAngle().getRadians()
+            leadVector.getAngle().getRadians()
         );
 
         m_drivetrain.drive(m_desiredSpeeds, true, FieldUtils.getAlliance() == Alliance.Blue);
