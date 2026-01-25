@@ -3,13 +3,13 @@ package frc.robot.commands;
 import static edu.wpi.first.units.Units.*;
 
 import static frc.robot.subsystems.drivetrain.DrivetrainConfiguration.kMaxLinearSpeed;
-import static frc.robot.subsystems.drivetrain.DrivetrainConfiguration.kMaxAngularSpeed;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -17,23 +17,15 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.drivetrain.DrivetrainSubsystem;
 import frc.robot.utils.FieldUtils;
 
-/**
- * A command for driving the robot field relative with a command-based Xbox controller's joysticks.
- * <p> This command will never end; only one should ever be instantiated, and it should be set as
- * the drivetrain's default command.
-*/
 public final class AutoAimCommand extends Command {
     private final CommandXboxController m_controller;
     private final DrivetrainSubsystem m_drivetrain;
 
     private final ChassisSpeeds m_desiredSpeeds = new ChassisSpeeds();
+    private final ProfiledPIDController m_omegaController = new ProfiledPIDController(
+        5.0, 0.0, 0.0, new TrapezoidProfile.Constraints(2.0 * Math.PI, 2.0 * Math.PI / 0.75)
+    );
 
-    /**
-     * Constructs a ControllerDriveCommand for the supplied controller and drivetrain.
-     * 
-     * @param controller The driver's Xbox controller.
-     * @param drivetrain The drivetrain subsystem.
-    */
     public AutoAimCommand(
         CommandXboxController controller,
         DrivetrainSubsystem drivetrain
@@ -41,8 +33,15 @@ public final class AutoAimCommand extends Command {
         m_controller = controller;
         m_drivetrain = drivetrain;
 
-        setName("ControllerDriveCommand");
+        m_omegaController.enableContinuousInput(-Math.PI, Math.PI);
+
+        setName("AutoAimCommand");
         addRequirements(m_drivetrain);
+    }
+
+    @Override
+    public final void initialize() {
+        m_omegaController.reset(m_drivetrain.getEstimatedPose().getRotation().getRadians());
     }
 
     @Override
@@ -66,29 +65,19 @@ public final class AutoAimCommand extends Command {
             leftY = leftY / leftMagnitude * scaledLeftMagnitude;
         }
 
-        var hubPose = FieldUtils.getAllianceHub();
-        var robotPose = m_drivetrain.getEstimatedPose();
-        var hubRelative = hubPose.minus(robotPose.getTranslation());
-        var speedsTemp = m_drivetrain.getChassisSpeeds();
-        speedsTemp = ChassisSpeeds.fromRobotRelativeSpeeds(speedsTemp, hubRelative.getAngle());
-        Translation2d robotVelocity = new Translation2d(
-            speedsTemp.vxMetersPerSecond,
-            speedsTemp.vyMetersPerSecond
-        );
-
-        // leading
-        var projVelocity = 8.0;
-        double timeToLead = Math.min(hubRelative.getNorm() / projVelocity * 5.0, 1.5);
-        var leadVector = hubRelative.minus(robotVelocity.times(timeToLead));
-        double angleError = leadVector.getAngle().minus(robotPose.getRotation()).getRadians();
-        //angleError = Math.atan2(Math.sin(angleError), Math.cos(angleError)); // Limit to [-pi, pi]
+        Pose2d robotPose = m_drivetrain.getEstimatedPose();
+        Translation2d hubRelativeTranslation = FieldUtils.getAllianceHub().minus(robotPose.getTranslation());
 
         // In the WPILib coordinate system, +X is forward and +Y is left (relative to
         // the blue driver station), so the controller X and Y are flipped and inverted.
         // This assumes that the drive function is also using blue origin coordinates.
         m_desiredSpeeds.vxMetersPerSecond = -leftY * kMaxLinearSpeed.in(MetersPerSecond);
         m_desiredSpeeds.vyMetersPerSecond = -leftX * kMaxLinearSpeed.in(MetersPerSecond);
-        m_desiredSpeeds.omegaRadiansPerSecond = angleError * 5.0;
+        m_desiredSpeeds.omegaRadiansPerSecond = m_omegaController.calculate(
+            robotPose.getRotation().getRadians(),
+            hubRelativeTranslation.getAngle().getRadians()
+        );
+
         m_drivetrain.drive(m_desiredSpeeds, true, FieldUtils.getAlliance() == Alliance.Blue);
     }
 

@@ -12,6 +12,7 @@ import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 import com.ctre.phoenix6.SignalLogger;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
@@ -51,6 +52,7 @@ public final class Robot extends LoggedRobot {
         Logger.start();
         SignalLogger.enableAutoLogging(false);
 
+        DriverStation.silenceJoystickConnectionWarning(!DriverStation.isFMSAttached());
         SmartDashboard.putData("CommandScheduler", CommandScheduler.getInstance());
 
         m_robotContainer = new RobotContainer();
