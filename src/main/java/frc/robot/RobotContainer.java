@@ -179,7 +179,19 @@ if (hubDistance > 1e-6) {
                 m_drivetrain.getSimulationPose().getRotation(),
                 Meters.of(0.762),
                 MetersPerSecond.of(8.0),
-                ShooterUtils.getQuadraticAngles(Meters.of(hubDistance), Meters.of(1.8288 - 0.25/*0.762*/), MetersPerSecond.of(8.0 + robotVelAlongHub)).getSecond()
+                ShooterUtils.getQuadraticAngles(
+                    Meters.of(
+                        ShooterUtils.getLeadedTranslation(
+                            m_drivetrain.getEstimatedPose(),
+                            FieldUtils.getAllianceHub(),
+                            MetersPerSecond.of(8.0),
+                            m_drivetrain.getChassisSpeeds(),
+                            10
+                        ).getNorm()
+                    ),
+                    Meters.of(1.58),
+                    MetersPerSecond.of(8.0)
+                    ).getSecond()
             ));
         }), new WaitCommand(0.2)));
     }

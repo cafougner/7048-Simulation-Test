@@ -65,34 +65,42 @@ public final class AutoAimCommand extends Command {
             leftY = leftY / leftMagnitude * scaledLeftMagnitude;
         }
 
-        var hubPose = FieldUtils.getAllianceHub();
-        var robotPose = m_drivetrain.getEstimatedPose();
-        var hubRelative = hubPose.minus(robotPose.getTranslation());
-        var speedsTemp = m_drivetrain.getChassisSpeeds();
-        speedsTemp = ChassisSpeeds.fromRobotRelativeSpeeds(speedsTemp, hubRelative.getAngle());
-        Translation2d robotVelocity = new Translation2d(
-            speedsTemp.vxMetersPerSecond,
-            speedsTemp.vyMetersPerSecond
+        // var hubPose = FieldUtils.getAllianceHub();
+        // var robotPose = m_drivetrain.getEstimatedPose();
+        // var hubRelative = hubPose.minus(robotPose.getTranslation());
+        // var speedsTemp = m_drivetrain.getChassisSpeeds();
+        // speedsTemp = ChassisSpeeds.fromRobotRelativeSpeeds(speedsTemp, hubRelative.getAngle());
+        // Translation2d robotVelocity = new Translation2d(
+        //     speedsTemp.vxMetersPerSecond,
+        //     speedsTemp.vyMetersPerSecond
+        // );
+
+        // double leadTime = hubRelative.getNorm() / (8.0 * Math.cos(
+        //     ShooterUtils.getPolynomialAngle(
+        //         Meters.of(hubRelative.getNorm()),
+        //         MetersPerSecond.of(8.0)
+        //     ).in(Radians)
+        // ));
+
+        // Translation2d leadVector = hubRelative.minus(robotVelocity.times(leadTime));
+
+        // for (int i = 0; i < 25; i++) {
+        //     double newLeadTime = leadVector.getNorm() / (8.0 * Math.cos(
+        //         ShooterUtils.getQuadraticAngles(
+        //             Meters.of(hubRelative.getNorm()), Meters.of(1.8288 - 0.25/*0.762*/), MetersPerSecond.of(8.0)
+        //         ).getSecond().in(Radians)
+        //     ));
+
+        //     leadVector = hubRelative.minus(robotVelocity.times(newLeadTime));
+        // }
+
+        Translation2d leadVector = ShooterUtils.getLeadedTranslation(
+            m_drivetrain.getEstimatedPose(),
+            FieldUtils.getAllianceHub(),
+            MetersPerSecond.of(8.0),
+            m_drivetrain.getChassisSpeeds(),
+            10
         );
-
-        double leadTime = hubRelative.getNorm() / (8.0 * Math.cos(
-            ShooterUtils.getPolynomialAngle(
-                Meters.of(hubRelative.getNorm()),
-                MetersPerSecond.of(8.0)
-            ).in(Radians)
-        ));
-
-        Translation2d leadVector = hubRelative.minus(robotVelocity.times(leadTime));
-
-        for (int i = 0; i < 25; i++) {
-            double newLeadTime = leadVector.getNorm() / (8.0 * Math.cos(
-                ShooterUtils.getQuadraticAngles(
-                    Meters.of(hubRelative.getNorm()), Meters.of(1.8288 - 0.25/*0.762*/), MetersPerSecond.of(8.0)
-                ).getSecond().in(Radians)
-            ));
-
-            leadVector = hubRelative.minus(robotVelocity.times(newLeadTime));
-        }
 
         // In the WPILib coordinate system, +X is forward and +Y is left (relative to
         // the blue driver station), so the controller X and Y are flipped and inverted.
@@ -100,7 +108,7 @@ public final class AutoAimCommand extends Command {
         m_desiredSpeeds.vxMetersPerSecond = -leftY * kMaxLinearSpeed.in(MetersPerSecond);
         m_desiredSpeeds.vyMetersPerSecond = -leftX * kMaxLinearSpeed.in(MetersPerSecond);
         m_desiredSpeeds.omegaRadiansPerSecond = m_omegaController.calculate(
-            robotPose.getRotation().getRadians(),
+            m_drivetrain.getEstimatedPose().getRotation().getRadians(),
             leadVector.getAngle().getRadians()
         );
 

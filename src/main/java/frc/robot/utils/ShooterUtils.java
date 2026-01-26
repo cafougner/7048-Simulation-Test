@@ -3,8 +3,12 @@ package frc.robot.utils;
 import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
+import static edu.wpi.first.units.Units.Radians;
 
 import edu.wpi.first.math.Pair;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
@@ -21,13 +25,11 @@ public final class ShooterUtils {
     };
 
     public static final Angle getPolynomialAngle(Distance distance, LinearVelocity velocity) {
-        return Degrees.of(
-            MathUtils.evaluateBivariate(
-                m_angleCoefficients,
-                distance.in(Meters),
-                velocity.in(MetersPerSecond)
-            )
-        );
+        return Degrees.of(MathUtils.evaluateBivariate(
+            m_angleCoefficients,
+            distance.in(Meters),
+            velocity.in(MetersPerSecond)
+        ));
     }
 
     public static final Pair<Angle, Angle> getQuadraticAngles(
@@ -47,5 +49,39 @@ public final class ShooterUtils {
             principalAngle.lt(secondaryAngle) ? principalAngle : secondaryAngle,
             principalAngle.gt(secondaryAngle) ? principalAngle : secondaryAngle
         );
+    }
+
+    public static final Translation2d getLeadedTranslation(
+        Pose2d robotPose,
+        Translation2d targetTranslation,
+        LinearVelocity projectileVelocity,
+        ChassisSpeeds robotSpeeds,
+        int... iterations
+    ) {
+        Translation2d targetRelative = targetTranslation.minus(robotPose.getTranslation());
+        ChassisSpeeds targetSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(robotSpeeds, robotPose.getRotation());
+        Translation2d robotSpeedsVector = new Translation2d(
+            targetSpeeds.vxMetersPerSecond,
+            targetSpeeds.vyMetersPerSecond
+        );
+
+        double v = projectileVelocity.in(MetersPerSecond);
+        Translation2d leadVector = targetRelative;
+
+        if (iterations.length == 0) iterations = new int[]{10};
+
+        for (int i = 0; i < iterations[0]; i++) {
+            double nextLeadTime = leadVector.getNorm() / (v * Math.cos(
+                getQuadraticAngles(
+                    Meters.of(leadVector.getNorm()),
+                    Meters.of(1.58),
+                    projectileVelocity
+                ).getSecond().in(Radians)
+            ));
+
+            leadVector = targetRelative.minus(robotSpeedsVector.times(nextLeadTime));
+        }
+
+        return leadVector;
     }
 }
