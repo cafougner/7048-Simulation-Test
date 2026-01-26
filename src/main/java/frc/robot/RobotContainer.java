@@ -130,35 +130,56 @@ public final class RobotContainer {
             // var speedTemp = m_drivetrain.getChassisSpeeds();
             // speedTemp = ChassisSpeeds.fromRobotRelativeSpeeds(speedTemp, hubRelative.getAngle());
             // var shooterAngle = ShooterUtils.getLaunchAngle(Meters.of(hubRelative.getNorm()), MetersPerSecond.of(8.0 + speedTemp.vxMetersPerSecond));
-            var hubPose = FieldUtils.getAllianceHub();
-            var robotPose = m_drivetrain.getEstimatedPose();
-            var hubRelative = hubPose.minus(robotPose.getTranslation());
-            var speedTemp = m_drivetrain.getChassisSpeeds();
+            // var hubPose = FieldUtils.getAllianceHub();
+            // var robotPose = m_drivetrain.getEstimatedPose();
+            // var hubRelative = hubPose.minus(robotPose.getTranslation());
+            // var speedTemp = m_drivetrain.getChassisSpeeds();
 
-            // Project robot velocity onto vector toward the hub
-            double hubDistance = hubRelative.getNorm();
-            double robotVelAlongHub = 0.0;
-            if (hubDistance > 1e-6) {
-                var hubUnit = hubRelative.div(hubDistance); // unit vector along hub
-                var robotVel = new Translation2d(speedTemp.vxMetersPerSecond, speedTemp.vyMetersPerSecond);
-                robotVelAlongHub = robotVel.dot(hubUnit);
-            }
+            // // Project robot velocity onto vector toward the hub
+            // double hubDistance = hubRelative.getNorm();
+            // double robotVelAlongHub = 0.0;
+            // if (hubDistance > 1e-6) {
+            //     var hubUnit = hubRelative.div(hubDistance); // unit vector along hub
+            //     var robotVel = new Translation2d(speedTemp.vxMetersPerSecond, speedTemp.vyMetersPerSecond);
+            //     robotVelAlongHub = robotVel.dot(hubUnit);
+            // }
+// Get robot and hub poses
+var robotPose = m_drivetrain.getEstimatedPose();
+var hubPose = FieldUtils.getAllianceHub();
+
+// Vector from robot to hub in field coordinates
+var hubRelative = hubPose.minus(robotPose.getTranslation());
+double hubDistance = hubRelative.getNorm();
+
+// Get robot-relative velocity from drivetrain
+var speedTemp = m_drivetrain.getChassisSpeeds(); // vx = forward, vy = left
+
+// Convert robot-relative velocity to field-relative
+Rotation2d robotRotation = robotPose.getRotation();
+double fieldVx = speedTemp.vxMetersPerSecond * robotRotation.getCos()
+               - speedTemp.vyMetersPerSecond * robotRotation.getSin();
+double fieldVy = speedTemp.vxMetersPerSecond * robotRotation.getSin()
+               + speedTemp.vyMetersPerSecond * robotRotation.getCos();
+
+var robotVelField = new Translation2d(fieldVx, fieldVy);
+
+// Project field-relative robot velocity onto vector toward the hub
+double robotVelAlongHub = 0.0;
+if (hubDistance > 1e-6) {
+    var hubUnit = hubRelative.div(hubDistance); // unit vector along hub
+    robotVelAlongHub = robotVelField.dot(hubUnit);
+}
 
             // Use projected velocity instead of just speedTemp.vxMetersPerSecond
-            var shooterAngle = ShooterUtils.getLaunchAngles(
-                MetersPerSecond.of(8.0),
-            Meters.of(hubDistance),
-            Meters.of(1.8288 -  0.762)
-            ).getSecond();
 
             SimulatedArena.getInstance().addGamePieceProjectile(new RebuiltFuelOnFly(
                 m_drivetrain.getSimulationPose().getTranslation(),
                 new Translation2d(),
-                m_drivetrain.getChassisSpeeds(),
+                ChassisSpeeds.fromRobotRelativeSpeeds(m_drivetrain.getChassisSpeeds(), m_drivetrain.getSimulationPose().getRotation()),
                 m_drivetrain.getSimulationPose().getRotation(),
                 Meters.of(0.762),
                 MetersPerSecond.of(8.0),
-                shooterAngle
+                ShooterUtils.getQuadraticAngles(Meters.of(hubDistance), Meters.of(1.8288 - 0.25/*0.762*/), MetersPerSecond.of(8.0 + robotVelAlongHub)).getSecond()
             ));
         }), new WaitCommand(0.2)));
     }

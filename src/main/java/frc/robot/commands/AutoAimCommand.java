@@ -75,22 +75,19 @@ public final class AutoAimCommand extends Command {
             speedsTemp.vyMetersPerSecond
         );
 
-        double leadTime = hubRelative.getNorm() / (12.0 * Math.cos(
-            ShooterUtils.getLaunchAngles(
-                MetersPerSecond.of(12.0),
+        double leadTime = hubRelative.getNorm() / (8.0 * Math.cos(
+            ShooterUtils.getPolynomialAngle(
                 Meters.of(hubRelative.getNorm()),
-                Meters.of(1.8288 - 0.0762)
-            ).getSecond().in(Radians)
+                MetersPerSecond.of(8.0)
+            ).in(Radians)
         ));
 
         Translation2d leadVector = hubRelative.minus(robotVelocity.times(leadTime));
 
         for (int i = 0; i < 25; i++) {
-            double newLeadTime = leadVector.getNorm() / (12.0 * Math.cos(
-                ShooterUtils.getLaunchAngles(
-                    MetersPerSecond.of(12.0),
-                    Meters.of(leadVector.getNorm()),
-                    Meters.of(1.8288 - 0.0762)
+            double newLeadTime = leadVector.getNorm() / (8.0 * Math.cos(
+                ShooterUtils.getQuadraticAngles(
+                    Meters.of(hubRelative.getNorm()), Meters.of(1.8288 - 0.25/*0.762*/), MetersPerSecond.of(8.0)
                 ).getSecond().in(Radians)
             ));
 
