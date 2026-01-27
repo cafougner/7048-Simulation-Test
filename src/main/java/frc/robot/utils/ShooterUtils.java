@@ -56,7 +56,7 @@ public final class ShooterUtils {
         Translation2d targetTranslation,
         LinearVelocity projectileVelocity,
         ChassisSpeeds robotSpeeds,
-        int... iterations
+        int iterations
     ) {
         Translation2d targetRelative = targetTranslation.minus(robotPose.getTranslation());
         ChassisSpeeds targetSpeeds = ChassisSpeeds.fromRobotRelativeSpeeds(robotSpeeds, robotPose.getRotation());
@@ -68,9 +68,7 @@ public final class ShooterUtils {
         double v = projectileVelocity.in(MetersPerSecond);
         Translation2d leadVector = targetRelative;
 
-        if (iterations.length == 0) iterations = new int[]{10};
-
-        for (int i = 0; i < iterations[0]; i++) {
+        for (int i = 0; i < iterations; i++) {
             double nextLeadTime = leadVector.getNorm() / (v * Math.cos(
                 getQuadraticAngles(
                     Meters.of(leadVector.getNorm()),
@@ -83,5 +81,20 @@ public final class ShooterUtils {
         }
 
         return leadVector;
+    }
+
+    public static final Translation2d getLeadedTranslation(
+        Pose2d robotPose,
+        Translation2d targetTranslation,
+        LinearVelocity projectileVelocity,
+        ChassisSpeeds robotSpeeds
+    ) {
+        return getLeadedTranslation(
+            robotPose,
+            targetTranslation,
+            projectileVelocity,
+            robotSpeeds,
+            10
+        );
     }
 }

@@ -185,8 +185,7 @@ if (hubDistance > 1e-6) {
                             m_drivetrain.getEstimatedPose(),
                             FieldUtils.getAllianceHub(),
                             MetersPerSecond.of(8.0),
-                            m_drivetrain.getChassisSpeeds(),
-                            10
+                            m_drivetrain.getChassisSpeeds()
                         ).getNorm()
                     ),
                     Meters.of(1.58),

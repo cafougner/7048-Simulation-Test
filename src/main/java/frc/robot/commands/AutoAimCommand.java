@@ -98,8 +98,7 @@ public final class AutoAimCommand extends Command {
             m_drivetrain.getEstimatedPose(),
             FieldUtils.getAllianceHub(),
             MetersPerSecond.of(8.0),
-            m_drivetrain.getChassisSpeeds(),
-            10
+            m_drivetrain.getChassisSpeeds()
         );
 
         // In the WPILib coordinate system, +X is forward and +Y is left (relative to
