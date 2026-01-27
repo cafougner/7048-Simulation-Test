@@ -65,35 +65,6 @@ public final class AutoAimCommand extends Command {
             leftY = leftY / leftMagnitude * scaledLeftMagnitude;
         }
 
-        // var hubPose = FieldUtils.getAllianceHub();
-        // var robotPose = m_drivetrain.getEstimatedPose();
-        // var hubRelative = hubPose.minus(robotPose.getTranslation());
-        // var speedsTemp = m_drivetrain.getChassisSpeeds();
-        // speedsTemp = ChassisSpeeds.fromRobotRelativeSpeeds(speedsTemp, hubRelative.getAngle());
-        // Translation2d robotVelocity = new Translation2d(
-        //     speedsTemp.vxMetersPerSecond,
-        //     speedsTemp.vyMetersPerSecond
-        // );
-
-        // double leadTime = hubRelative.getNorm() / (8.0 * Math.cos(
-        //     ShooterUtils.getPolynomialAngle(
-        //         Meters.of(hubRelative.getNorm()),
-        //         MetersPerSecond.of(8.0)
-        //     ).in(Radians)
-        // ));
-
-        // Translation2d leadVector = hubRelative.minus(robotVelocity.times(leadTime));
-
-        // for (int i = 0; i < 25; i++) {
-        //     double newLeadTime = leadVector.getNorm() / (8.0 * Math.cos(
-        //         ShooterUtils.getQuadraticAngles(
-        //             Meters.of(hubRelative.getNorm()), Meters.of(1.8288 - 0.25/*0.762*/), MetersPerSecond.of(8.0)
-        //         ).getSecond().in(Radians)
-        //     ));
-
-        //     leadVector = hubRelative.minus(robotVelocity.times(newLeadTime));
-        // }
-
         Translation2d leadVector = ShooterUtils.getLeadedTranslation(
             m_drivetrain.getEstimatedPose(),
             FieldUtils.getAllianceHub(),

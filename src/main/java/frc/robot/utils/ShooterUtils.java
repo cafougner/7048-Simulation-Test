@@ -14,7 +14,6 @@ import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 
 public final class ShooterUtils {
-    // Coefficients must use rectangular mapping (necessitated by the MathUtils implementations of polynomials).
     private static final double[][] m_angleCoefficients = {
         {  -71.266188447569920,   92.239379642263190,  -20.485516376989940,    2.209791809586092,   -0.115910911316219,    0.002368592334477},
         { -161.684430508642980,   60.667295795086860,   -8.891620351789737,    0.581145838107222,   -0.014099175681324,    0.000000000000000},
@@ -25,7 +24,7 @@ public final class ShooterUtils {
     };
 
     public static final Angle getPolynomialAngle(Distance distance, LinearVelocity velocity) {
-        return Degrees.of(MathUtils.evaluateBivariate(
+        return Degrees.of(PolynomialUtils.evaluateBivariate(
             m_angleCoefficients,
             distance.in(Meters),
             velocity.in(MetersPerSecond)
@@ -94,7 +93,7 @@ public final class ShooterUtils {
             targetTranslation,
             projectileVelocity,
             robotSpeeds,
-            10
+            5
         );
     }
 }
