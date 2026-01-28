@@ -73,7 +73,7 @@ public final class ControllerDriveCommand extends Command {
         m_desiredSpeeds.vxMetersPerSecond = -leftY * kMaxLinearSpeed.in(MetersPerSecond);
         m_desiredSpeeds.vyMetersPerSecond = -leftX * kMaxLinearSpeed.in(MetersPerSecond);
         m_desiredSpeeds.omegaRadiansPerSecond = -rightX * kMaxAngularSpeed.in(RadiansPerSecond);
-        m_drivetrain.drive(m_desiredSpeeds, true, FieldUtils.getAlliance() == Alliance.Blue);
+        m_drivetrain.drive(m_desiredSpeeds, true, FieldUtils.isBlueAlliance());
     }
 
     /**

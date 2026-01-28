@@ -82,7 +82,7 @@ public final class AutoAimCommand extends Command {
             leadVector.getAngle().getRadians()
         );
 
-        m_drivetrain.drive(m_desiredSpeeds, true, FieldUtils.getAlliance() == Alliance.Blue);
+        m_drivetrain.drive(m_desiredSpeeds, true, FieldUtils.isBlueAlliance());
     }
 
     /**
