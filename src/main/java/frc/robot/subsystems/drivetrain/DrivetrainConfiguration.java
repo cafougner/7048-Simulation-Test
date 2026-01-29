@@ -1,6 +1,7 @@
 package frc.robot.subsystems.drivetrain;
 
 import static edu.wpi.first.units.Units.Amps;
+import static edu.wpi.first.units.Units.Degrees;
 import static edu.wpi.first.units.Units.Inches;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
@@ -16,6 +17,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.signals.GainSchedBehaviorValue;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -60,6 +62,7 @@ public final class DrivetrainConfiguration {
         .withSlot0(new Slot0Configs()
             .withKP(41.49).withKI(0.000).withKD(1.141)
             .withKS(0.013).withKV(0.000).withKA(0.000) // Exclude kV and kS.
+            .withGainSchedBehavior(GainSchedBehaviorValue.ZeroOutput)
         ).withMotionMagic(new MotionMagicConfigs()
             .withMotionMagicCruiseVelocity(RotationsPerSecond.of(25.0))
             .withMotionMagicAcceleration(RotationsPerSecondPerSecond.of(160.0))
@@ -68,6 +71,7 @@ public final class DrivetrainConfiguration {
             .withSupplyCurrentLimit(Amps.of(40.0))
         ).withClosedLoopGeneral(new ClosedLoopGeneralConfigs()
             .withContinuousWrap(true)
+            .withGainSchedErrorThreshold(Degrees.of(0.25))
         );
 
     // clean up below
